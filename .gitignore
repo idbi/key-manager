@@ -109,3 +109,15 @@ modules.xml
 .idea/sonarlint
 
 # End of https://www.gitignore.io/api/laravel,phpstorm+all
+
+# Created by https://www.gitignore.io/api/phpcodesniffer
+# Edit at https://www.gitignore.io/?templates=phpcodesniffer
+
+### PHPCodeSniffer ###
+# CodeSniffer
+
+/vendor/*
+/wpcs/*
+.php_cs.cache
+
+# End of https://www.gitignore.io/api/phpcodesniffer

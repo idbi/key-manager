@@ -13,16 +13,8 @@ class KeyManagerServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/config.php' => config_path('skeleton.php'),
+                __DIR__ . '/../config/manager.php' => config_path('manager.php'),
             ], 'config');
-
-            /*
-            $this->loadViewsFrom(__DIR__.'/../resources/views', 'skeleton');
-
-            $this->publishes([
-                __DIR__.'/../resources/views' => base_path('resources/views/vendor/skeleton'),
-            ], 'views');
-            */
         }
     }
 
@@ -31,6 +23,7 @@ class KeyManagerServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'skeleton');
+        $this->mergeConfigFrom(__DIR__ . '/../config/manager.php', 'manager');
+        $this->mergeConfigFrom(__DIR__ . '/../config/filesystem.php.php', 'filesystems');
     }
 }
