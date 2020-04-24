@@ -5,7 +5,7 @@ namespace ID\KeyManager;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see \Spatie\Skeleton\SkeletonClass
+ * @see \ID\KeyManager\SkeletonClass
  */
 class KeyManagerFacade extends Facade
 {

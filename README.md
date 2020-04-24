@@ -1,31 +1,28 @@
-# Very short description of the package
+# Key Manager
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/keys-manager.svg?style=flat-square)](https://packagist.org/packages/spatie/:package_name)
-[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/spatie/keys-manager/run-tests?label=tests)](https://github.com/spatie/:package_name/actions?query=workflow%3Arun-tests+branch%3Amaster)
-[![Total Downloads](https://img.shields.io/packagist/dt/spatie/keys-manager.svg?style=flat-square)](https://packagist.org/packages/spatie/:package_name)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/idbi/key-manager.svg?style=flat-square)](https://packagist.org/packages/idbi/key-manager)
+[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/idbi/key-manager/run-tests?label=tests)](https://github.com/idbi/key-manager/actions?query=workflow%3Arun-tests+branch%3Amaster)
+[![Total Downloads](https://img.shields.io/packagist/dt/idbi/key-manager.svg?style=flat-square)](https://packagist.org/packages/idbi/:package_name)
 
 
-This is where your description should go. Try and limit it to a paragraph or two. Consider adding a small example.
+This package is responsible for generating, fetching and saving encryption keys to a secure storage like S3.
 
 ## Support us
 
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us). 
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+We love making a lot of resources for free use that are [best in class]. You can support us by [buying us a coffee](https://www.buymeacoffee.com/nickaguilarh). 
 
 ## Installation
 
 You can install the package via composer:
 
 ```bash
-composer require spatie/keys-manager
+composer require idbi/keys-manager
 ```
 
 ## Usage
 
 ``` php
-$skeleton = new Spatie\Skeleton();
-echo $skeleton->echoPhrase('Hello, Spatie!');
+TODO
 ```
 
 ## Testing
@@ -44,7 +41,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Security
 
-If you discover any security related issues, please email freek@spatie.be instead of using the issue tracker.
+If you discover any security related issues, please email nick.aguilar@idbi.pe instead of using the issue tracker.
 
 ## Credits
 
