@@ -4,7 +4,7 @@ namespace ID\KeyManager;
 
 use Illuminate\Support\ServiceProvider;
 
-class SkeletonServiceProvider extends ServiceProvider
+class KeyManagerServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
