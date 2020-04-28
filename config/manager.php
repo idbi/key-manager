@@ -18,6 +18,11 @@ return [
     'strict' => true,
 
     /**
+     * The motor that will be used to store the credentials db.
+     */
+    'index_file' => 'index.yml',
+
+    /**
      * This is the default filesystem storage unit.
      * This should be defined according what your storage supports and your own needs.
      *
@@ -25,4 +30,46 @@ return [
      */
     'storage' => 'secure',
 
+    /**
+     * Certificates directory
+     */
+    'local_path' => storage_path('certs'),
+
+    /**
+     * Certificates remote directory
+     */
+    'remote_path' => 'keys',
+
+    /**
+     * Credentials configuration
+     */
+    'credentials' => [
+        'root' => [
+            'type' => \phpseclib\Crypt\RSA::class,
+            'password' => true,
+            'path' => 'roots',
+            'filename' => 'root',
+            'size' => 4096,
+            'keep' => 1,
+            'sync' => ['public']
+        ],
+        'oauth' => [
+            'type' => \phpseclib\Crypt\RSA::class,
+            'password' => false,
+            'path' => 'oauth',
+            'filename' => 'oauth',
+            'size' => 4096,
+            'keep' => 3,
+            'sync' => ['*']
+        ],
+        'webhooks' => [
+            'type' => \phpseclib\Crypt\RSA::class,
+            'password' => false,
+            'path' => 'webhooks',
+            'filename' => 'webhook',
+            'size' => 4096,
+            'keep' => 1,
+            'sync' => ['*']
+        ]
+    ]
 ];

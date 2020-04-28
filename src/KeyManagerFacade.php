@@ -2,6 +2,7 @@
 
 namespace ID\KeyManager;
 
+use ID\KeyManager\Services\KeyManagerService;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -16,6 +17,6 @@ class KeyManagerFacade extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'keyManager';
+        return KeyManagerService::class;
     }
 }

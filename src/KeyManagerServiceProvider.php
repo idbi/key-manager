@@ -2,6 +2,7 @@
 
 namespace ID\KeyManager;
 
+use Auth\Repositories\KeyRepository;
 use Illuminate\Support\ServiceProvider;
 
 class KeyManagerServiceProvider extends ServiceProvider
@@ -24,6 +25,6 @@ class KeyManagerServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/manager.php', 'manager');
-        $this->mergeConfigFrom(__DIR__ . '/../config/filesystem.php.php', 'filesystems');
+        $this->mergeConfigFrom(__DIR__ . '/../config/filesystem.php', 'filesystems');
     }
 }
