@@ -2,7 +2,6 @@
 
 namespace ID\KeyManager;
 
-use Auth\Repositories\KeyRepository;
 use Illuminate\Support\ServiceProvider;
 
 class KeyManagerServiceProvider extends ServiceProvider

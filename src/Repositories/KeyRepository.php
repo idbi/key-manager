@@ -3,13 +3,11 @@
 
 namespace ID\KeyManager\Repositories;
 
-
 use ID\KeyManager\Factories\KeyFactory;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -53,10 +51,11 @@ class KeyRepository
     public function syncAll(): bool
     {
         foreach ($this->keys as $key => $value) {
-            if (!$this->syncKey($key)) {
+            if (! $this->syncKey($key)) {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -70,6 +69,7 @@ class KeyRepository
     public function syncKey(string $keyName): bool
     {
         $this->validateKey($keyName);
+
         return $this->fetchKey($keyName);
     }
 
@@ -93,6 +93,7 @@ class KeyRepository
         }
         $key['sync'] = array_values($sync);
         $this->downloadKeys($key);
+
         return true;
     }
 
@@ -113,6 +114,7 @@ class KeyRepository
                 $this->downloadKey($file);
             }
         }
+
         return true;
     }
 
@@ -134,8 +136,10 @@ class KeyRepository
             $this->lastPublic = $factory->getPublicKey();
             $this->isDirty = true;
             $this->saveKey($factory->getConfig());
+
             return true;
         }
+
         return false;
     }
 
@@ -165,6 +169,7 @@ class KeyRepository
         }
 
         $this->rotateKeys($config);
+
         return true;
     }
 
@@ -175,9 +180,10 @@ class KeyRepository
      */
     private function validateKey(string $keyName): bool
     {
-        if (!key_exists($keyName, $this->keys)) {
+        if (! key_exists($keyName, $this->keys)) {
             throw new \InvalidArgumentException(sprintf('The key "%s" is NOT defined.', $keyName));
         }
+
         return true;
     }
 
@@ -186,7 +192,7 @@ class KeyRepository
      */
     public static function getRevision(): callable
     {
-        return fn() => time();
+        return fn () => time();
     }
 
     /**
@@ -197,7 +203,7 @@ class KeyRepository
     public function rotateKeys(?array $config = null): bool
     {
         try {
-            if (!$config) {
+            if (! $config) {
                 $rotateKeys = array_values($this->keys);
             } else {
                 $rotateKeys = [$config];
@@ -217,6 +223,7 @@ class KeyRepository
                     }
                 }
             }
+
             return true;
         } catch (\Throwable $exception) {
             return false;
@@ -227,6 +234,7 @@ class KeyRepository
     {
         $path = config('manager.remote_path', '.');
         $path = rtrim($path, '/') . '/' . Arr::get($config, 'path');
+
         return rtrim($path, '/');
     }
 
@@ -253,8 +261,10 @@ class KeyRepository
                     if (Str::endsWith($file, $filter) || $filter == '*') {
                         return true;
                     }
+
                     return false;
                 }
+
                 return false;
             }
         );
