@@ -5,10 +5,13 @@ namespace ID\KeyManager\Repositories;
 
 
 use ID\KeyManager\Factories\KeyFactory;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class KeyRepository
 {
@@ -33,11 +36,17 @@ class KeyRepository
     private bool $isDirty = false;
 
     /**
+     * @var bool
+     */
+    protected bool $isStrict = false;
+
+    /**
      * KeyRepository constructor.
      */
     public function __construct()
     {
         $this->keys = config('manager.credentials', []);
+        $this->isStrict = config('manager.strict', false);
     }
 
 
@@ -77,22 +86,45 @@ class KeyRepository
     {
         $key = $this->keys[$keyName];
         $sync = [];
-        if (is_string($types) && $types === '*') {
-            $sync = Arr::get($key, 'sync');
+        if ($types === '*') {
+            $sync = ['*'];
         } elseif (is_array($types)) {
             $sync = array_intersect(Arr::get($key, 'sync'), $types);
         }
         $key['sync'] = array_values($sync);
-        $this->downloadKey($key);
+        $this->downloadKeys($key);
         return true;
     }
 
-    private function downloadKey(array $key): bool
+    private function downloadKeys(array $config): bool
     {
-//        $factory = KeyFactory::generate($key);
-//        dd($factory);
-//        $directories = Storage::disk(config('manager.storage'))->directories();
-//        dd($directories);
+        $path = $this->getPath($config);
+        $sync = Arr::get($config, 'sync');
+        $revisions = $this->getStorage()->directories($path);
+        if (empty($revisions) && $this->isStrict) {
+            $factory = app(KeyFactory::class)->load($config)->generate();
+            $this->saveFromFactory($factory);
+            $this->downloadKeys($config);
+        }
+        foreach ($revisions as $revision) {
+            $keys = $this->getStorage()->files($revision);
+            $files = $this->filterKeys($keys, $sync);
+            foreach ($files as $file) {
+                $this->downloadKey($file);
+            }
+        }
+        return true;
+    }
+
+    private function downloadKey(string $path)
+    {
+        try {
+            $file = $this->getStorage()->get($path);
+            $localFile = $this->getLocalStorage()->put($path, $file);
+            dd($path, $file, $localFile);
+        } catch (FileNotFoundException $e) {
+            return false;
+        }
     }
 
     public function saveFromFactory(KeyFactory $factory): bool
@@ -102,8 +134,9 @@ class KeyRepository
             $this->lastPublic = $factory->getPublicKey();
             $this->isDirty = true;
             $this->saveKey($factory->getConfig());
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -124,13 +157,11 @@ class KeyRepository
 
         //  TODO: This should be replace with a quick validation of a key.
         if ($this->lastPublic !== null) {
-            Storage::disk(config('manager.storage'))
-                ->put("{$path}/{$filename}.pub", $this->lastPublic);
+            $this->getStorage()->put("{$path}/{$filename}.pub", $this->lastPublic);
         }
         //  TODO: This should be replace with a quick validation of a key.
         if ($this->lastPrivate !== null) {
-            Storage::disk(config('manager.storage'))
-                ->put("{$path}/{$filename}.key", $this->lastPrivate);
+            $this->getStorage()->put("{$path}/{$filename}.key", $this->lastPrivate);
         }
 
         $this->rotateKeys($config);
@@ -173,18 +204,14 @@ class KeyRepository
             }
             foreach ($rotateKeys as $rotateKey) {
                 $path = $this->getPath($rotateKey);
-                $revisions = Storage::disk(config('manager.storage'))->directories($path);
-                if (!is_array($revisions)) {
-                    Log::info('There was no revision to rotate.');
-                    return false;
-                }
+                $revisions = $this->getStorage()->directories($path);
                 $revisions = array_slice(
                     $revisions,
                     0,
                     count($revisions) - (int)Arr::get($config, 'keep', 1)
                 );
                 foreach ($revisions as $revision) {
-                    $result = Storage::disk(config('manager.storage'))->deleteDirectory($revision);
+                    $result = $this->getStorage()->deleteDirectory($revision);
                     if ($result === false) {
                         return false;
                     }
@@ -201,5 +228,35 @@ class KeyRepository
         $path = config('manager.remote_path', '.');
         $path = rtrim($path, '/') . '/' . Arr::get($config, 'path');
         return rtrim($path, '/');
+    }
+
+    /**
+     * @return Filesystem
+     */
+    private function getStorage(): Filesystem
+    {
+        return Storage::disk(config('manager.storage'));
+    }
+
+
+    private function getLocalStorage(): Filesystem
+    {
+        return Storage::disk(config('manager.local_storage'));
+    }
+
+    private function filterKeys(array $keys, array $filters = ['*'])
+    {
+        return array_filter(
+            $keys,
+            function ($file) use ($filters) {
+                foreach ($filters as $filter) {
+                    if (Str::endsWith($file, $filter) || $filter == '*') {
+                        return true;
+                    }
+                    return false;
+                }
+                return false;
+            }
+        );
     }
 }

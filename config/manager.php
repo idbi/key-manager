@@ -30,10 +30,13 @@ return [
      */
     'storage' => 'secure',
 
+
     /**
-     * Certificates directory
+     * This is the default local filesystem storage unit.
+     *
+     * @default local
      */
-    'local_path' => storage_path('certs'),
+    'local_storage' => 'local',
 
     /**
      * Certificates remote directory
@@ -51,7 +54,7 @@ return [
             'filename' => 'root',
             'size' => 4096,
             'keep' => 1,
-            'sync' => ['public']
+            'sync' => ['pub']
         ],
         'oauth' => [
             'type' => \phpseclib\Crypt\RSA::class,
