@@ -53,7 +53,7 @@ class KeyRepository
     public function syncAll(): bool
     {
         foreach ($this->keys as $key => $value) {
-            if (!$this->syncKey($key)) {
+            if (! $this->syncKey($key)) {
                 return false;
             }
         }
@@ -181,7 +181,7 @@ class KeyRepository
      */
     private function validateKey(string $keyName): bool
     {
-        if (!key_exists($keyName, $this->keys)) {
+        if (! key_exists($keyName, $this->keys)) {
             throw new \InvalidArgumentException(sprintf('The key "%s" is NOT defined.', $keyName));
         }
 
@@ -193,7 +193,7 @@ class KeyRepository
      */
     public static function getRevision(): callable
     {
-        return fn() => time();
+        return fn () => time();
     }
 
     /**
@@ -204,7 +204,7 @@ class KeyRepository
     public function rotateKeys(?array $config = null): bool
     {
         try {
-            if (!$config) {
+            if (! $config) {
                 $rotateKeys = array_values($this->keys);
             } else {
                 $rotateKeys = [$config];
@@ -310,7 +310,10 @@ class KeyRepository
         }
 
         return false;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 10f1b453a30f3efed9ead6c16f7719972f7b2e32
     }
 
     public static function getPublicKey(array $config)
