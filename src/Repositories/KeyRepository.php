@@ -4,17 +4,20 @@
 namespace ID\KeyManager\Repositories;
 
 use ID\KeyManager\Factories\KeyFactory;
+use Illuminate\Config\Repository;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use function PHPUnit\Framework\throwException;
 
 class KeyRepository
 {
     /**
-     * @var \Illuminate\Config\Repository|\Illuminate\Contracts\Foundation\Application|mixed
+     * @var Repository|Application|mixed
      */
     private array $keys;
 
@@ -51,7 +54,7 @@ class KeyRepository
     public function syncAll(): bool
     {
         foreach ($this->keys as $key => $value) {
-            if (! $this->syncKey($key)) {
+            if (!$this->syncKey($key)) {
                 return false;
             }
         }
@@ -76,7 +79,7 @@ class KeyRepository
     /**
      * Retrieves a single key from the store.
      *
-     * @param string       $keyName
+     * @param string $keyName
      *
      * @param string|array $types
      *
@@ -123,7 +126,6 @@ class KeyRepository
         try {
             $file = $this->getStorage()->get($path);
             $localFile = $this->getLocalStorage()->put($path, $file);
-            dd($path, $file, $localFile);
         } catch (FileNotFoundException $e) {
             return false;
         }
@@ -180,7 +182,7 @@ class KeyRepository
      */
     private function validateKey(string $keyName): bool
     {
-        if (! key_exists($keyName, $this->keys)) {
+        if (!key_exists($keyName, $this->keys)) {
             throw new \InvalidArgumentException(sprintf('The key "%s" is NOT defined.', $keyName));
         }
 
@@ -192,7 +194,7 @@ class KeyRepository
      */
     public static function getRevision(): callable
     {
-        return fn () => time();
+        return fn() => time();
     }
 
     /**
@@ -203,7 +205,7 @@ class KeyRepository
     public function rotateKeys(?array $config = null): bool
     {
         try {
-            if (! $config) {
+            if (!$config) {
                 $rotateKeys = array_values($this->keys);
             } else {
                 $rotateKeys = [$config];
@@ -268,5 +270,53 @@ class KeyRepository
                 return false;
             }
         );
+    }
+
+    public function getPathOfPrivateKey()
+    {
+        $path = $this->getLocalStorage()->directories("{$this->getPath([])}/roots")[0] . '/root.key';
+
+        return $this->getLocalStorage()->exists($path) ? $path : false;
+    }
+
+    public function getPathOfPublicKey()
+    {
+        $path = $this->getLocalStorage()->directories("{$this->getPath([])}/roots")[0] . '/root.pub';
+
+        return $this->getLocalStorage()->exists($path) ? $path : false;
+    }
+
+    public function getPrivateKey()
+    {
+        $path = $this->getLocalStorage()->directories("{$this->getPath([])}/roots")[0] . '/root.key';
+
+        if ($this->fileExists($path)) {
+            return $this->getContentFile($path);
+        }
+
+        return false;
+
+
+    }
+
+    public function getPublicKey()
+    {
+        $path = $this->getLocalStorage()->directories("{$this->getPath([])}/roots")[0] . '/root.pub';
+
+        if ($this->fileExists($path)) {
+            return $this->getContentFile($path);
+        }
+
+        return false;
+    }
+
+    private function getContentFile(string $path)
+    {
+        return $this->getLocalStorage()->get($path);
+    }
+
+    private function fileExists(string $path)
+    {
+        return $this->getLocalStorage()->exists($path);
     }
 }
