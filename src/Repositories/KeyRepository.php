@@ -12,7 +12,6 @@ use Illuminate\Support\Arr;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use function PHPUnit\Framework\throwException;
 
 class KeyRepository
 {
@@ -54,7 +53,7 @@ class KeyRepository
     public function syncAll(): bool
     {
         foreach ($this->keys as $key => $value) {
-            if (!$this->syncKey($key)) {
+            if (! $this->syncKey($key)) {
                 return false;
             }
         }
@@ -182,7 +181,7 @@ class KeyRepository
      */
     private function validateKey(string $keyName): bool
     {
-        if (!key_exists($keyName, $this->keys)) {
+        if (! key_exists($keyName, $this->keys)) {
             throw new \InvalidArgumentException(sprintf('The key "%s" is NOT defined.', $keyName));
         }
 
@@ -194,7 +193,7 @@ class KeyRepository
      */
     public static function getRevision(): callable
     {
-        return fn() => time();
+        return fn () => time();
     }
 
     /**
@@ -205,7 +204,7 @@ class KeyRepository
     public function rotateKeys(?array $config = null): bool
     {
         try {
-            if (!$config) {
+            if (! $config) {
                 $rotateKeys = array_values($this->keys);
             } else {
                 $rotateKeys = [$config];
@@ -295,8 +294,6 @@ class KeyRepository
         }
 
         return false;
-
-
     }
 
     public function getPublicKey()
