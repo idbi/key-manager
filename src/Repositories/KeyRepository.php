@@ -12,7 +12,6 @@ use Illuminate\Support\Arr;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use function PHPUnit\Framework\throwException;
 
 class KeyRepository
 {
@@ -125,7 +124,7 @@ class KeyRepository
     {
         try {
             $file = $this->getStorage()->get($path);
-            $localFile = $this->getLocalStorage()->put($path, $file);
+            $localFile = static::getLocalStorage()->put($path, $file);
         } catch (FileNotFoundException $e) {
             return false;
         }
@@ -232,7 +231,7 @@ class KeyRepository
         }
     }
 
-    private function getPath(array $config): string
+    private static function getPath(array $config): string
     {
         $path = config('manager.remote_path', '.');
         $path = rtrim($path, '/') . '/' . Arr::get($config, 'path');
@@ -249,7 +248,7 @@ class KeyRepository
     }
 
 
-    private function getLocalStorage(): Filesystem
+    private static function getLocalStorage(): Filesystem
     {
         return Storage::disk(config('manager.local_storage'));
     }
@@ -272,51 +271,67 @@ class KeyRepository
         );
     }
 
-    public function getPathOfPrivateKey()
+    public static function getPathOfLastPrivateKey(array $config)
     {
-        $path = $this->getLocalStorage()->directories("{$this->getPath([])}/roots")[0] . '/root.key';
+        $revisions = static::getLocalStorage()->directories(static::getPath($config));
 
-        return $this->getLocalStorage()->exists($path) ? $path : false;
+        if (empty($revisions)) {
+            return false;
+        }
+
+        $lastPath = reset($revisions);
+
+        $lastPath = rtrim($lastPath, '/') . '/' . Arr::get($config, 'filename') . '.key';
+
+        return static::getLocalStorage()->exists($lastPath) ? $lastPath : false;
     }
 
-    public function getPathOfPublicKey()
+    public static function getPathOfLastPublicKey(array $config)
     {
-        $path = $this->getLocalStorage()->directories("{$this->getPath([])}/roots")[0] . '/root.pub';
+        $revisions = static::getLocalStorage()->directories(static::getPath($config));
 
-        return $this->getLocalStorage()->exists($path) ? $path : false;
+        if (empty($revisions)) {
+            return false;
+        }
+
+        $lastPath = reset($revisions);
+
+        $lastPath = rtrim($lastPath, '/') . '/' . Arr::get($config, 'filename') . '.pub';
+
+        return static::getLocalStorage()->exists($lastPath) ? $lastPath : false;
     }
 
-    public function getPrivateKey()
+    public static function getPrivateKey(array $config)
     {
-        $path = $this->getLocalStorage()->directories("{$this->getPath([])}/roots")[0] . '/root.key';
+        $path = static::getPathOfLastPrivateKey($config);
 
-        if ($this->fileExists($path)) {
-            return $this->getContentFile($path);
+        if (!empty($path) && static::fileExists($path)) {
+            return static::getContentFile($path);
         }
 
         return false;
 
-
     }
 
-    public function getPublicKey()
+    public static function getPublicKey(array $config)
     {
-        $path = $this->getLocalStorage()->directories("{$this->getPath([])}/roots")[0] . '/root.pub';
+        $path = static::getPathOfLastPublicKey($config);
 
-        if ($this->fileExists($path)) {
-            return $this->getContentFile($path);
+        if (!empty($path) && static::fileExists($path)) {
+            return static::getContentFile($path);
         }
 
         return false;
     }
 
-    private function getContentFile(string $path)
+    private static function getContentFile(string $path)
     {
-        return $this->getLocalStorage()->get($path);
+        return static::getLocalStorage()->get($path);
     }
 
-    private function fileExists(string $path)
+    private static function fileExists(string $path)
     {
-        return $this->getLocalStorage()->exists($path);
+        return static::getLocalStorage()->exists($path);
     }
+
 }
